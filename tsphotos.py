@@ -71,8 +71,9 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
                     img = img.convert('RGBA')
                     overlay = Image.new('RGBA', img.size, (0, 0, 0, 0))
                     draw = ImageDraw.Draw(overlay)
+                    max_width_height = max(img.width, img.height)
 
-                    font_size = 0.01736111 * max(img.width, img.height)
+                    font_size = 0.01736111 * max_width_height
                     font = ImageFont.truetype(font_path, font_size)
                     
                     bbox = draw.textbbox((0, 0), current_datetime, font=font)
@@ -84,21 +85,23 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
                     photo_width = 6
                     photo_height = 4
 
+                    sratio_200 = 0.04960317
+                    sratio_220 = 0.05456349
                     # Position text based on image orientation
                     if is_horizontal:
                         print_width = img.width
                         print_height = img.width*photo_height/photo_width
                         print_hoffset = (img.height - print_height) / 2
 
-                        text_x = img.width - text_width - 200
-                        text_y = img.height - text_height - print_hoffset - 200
+                        text_x = img.width - text_width - sratio_200 * max_width_height
+                        text_y = img.height - text_height - print_hoffset - sratio_200 * max_width_height
                     else:
                         print_height = img.height
                         print_width = img.height*photo_height/photo_width
                         print_woffset = (img.width - print_width) / 2
 
-                        text_x = img.width - text_width - print_woffset - 200
-                        text_y = img.height - text_height - 220
+                        text_x = img.width - text_width - print_woffset - sratio_200 * max_width_height
+                        text_y = img.height - text_height - sratio_220 * max_width_height
 
                     text_position = (text_x, text_y)
                     
