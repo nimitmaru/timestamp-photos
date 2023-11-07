@@ -2,6 +2,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont, ImageOps, ExifTags
 from pillow_heif import register_heif_opener
 from datetime import datetime
+import math
 
 register_heif_opener()
 
@@ -44,9 +45,16 @@ def add_rounded_rectangle(draw, position, radius, fill):
         fill=fill
     )
 
+def ratio_size(x, img):
+    max_width_height = max(img.width, img.height)
+    return (x/4032)*max_width_height
 
 def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
     output_directory = os.path.join(directory, "timestamped")
+    text_color = (235, 235, 235)
+    photo_width = 6
+    photo_height = 4
+
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
     
@@ -71,9 +79,8 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
                     img = img.convert('RGBA')
                     overlay = Image.new('RGBA', img.size, (0, 0, 0, 0))
                     draw = ImageDraw.Draw(overlay)
-                    max_width_height = max(img.width, img.height)
 
-                    font_size = 0.01736111 * max_width_height
+                    font_size = max(16,math.ceil(ratio_size(70,img)))
                     font = ImageFont.truetype(font_path, font_size)
                     
                     bbox = draw.textbbox((0, 0), current_datetime, font=font)
@@ -82,30 +89,26 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
                     
                     is_horizontal = img.width > img.height
                     
-                    photo_width = 6
-                    photo_height = 4
 
-                    sratio_200 = 0.04960317
-                    sratio_220 = 0.05456349
                     # Position text based on image orientation
                     if is_horizontal:
                         print_width = img.width
                         print_height = img.width*photo_height/photo_width
                         print_hoffset = (img.height - print_height) / 2
 
-                        text_x = img.width - text_width - sratio_200 * max_width_height
-                        text_y = img.height - text_height - print_hoffset - sratio_200 * max_width_height
+                        text_x = img.width - text_width - ratio_size(200,img)
+                        text_y = img.height - text_height - print_hoffset - ratio_size(200,img)
                     else:
                         print_height = img.height
                         print_width = img.height*photo_height/photo_width
                         print_woffset = (img.width - print_width) / 2
 
-                        text_x = img.width - text_width - print_woffset - sratio_200 * max_width_height
-                        text_y = img.height - text_height - sratio_220 * max_width_height
+                        text_x = img.width - text_width - print_woffset - ratio_size(200,img)
+                        text_y = img.height - text_height - ratio_size(220,img)
 
                     text_position = (text_x, text_y)
                     
-                    padding = 26
+                    padding = max(10,math.ceil(ratio_size(26,img)))
                     background_position = (
                         text_position[0] - padding,
                         text_position[1] - padding/2,
@@ -113,7 +116,7 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
                         text_position[1] + text_height + 2*padding
                     )
                     
-                    radius = 20  # Radius for the rounded corners
+                    radius = max(4, ratio_size(20,img))  # Radius for the rounded corners
                     add_rounded_rectangle(draw, background_position, radius, (0, 0, 0, 50))
                     
                     # Composite the overlay with the original image
@@ -122,7 +125,6 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
                     # Convert back to RGB and draw the text over the background
                     img = img.convert('RGB')
                     draw = ImageDraw.Draw(img)
-                    text_color = (235, 235, 235)
                     draw.text(text_position, current_datetime, font=font, fill=text_color)
                     
                     output_filename = f"{filename.rsplit('.', 1)[0]}{suffix}.jpg"
