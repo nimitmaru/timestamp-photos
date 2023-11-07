@@ -1,8 +1,8 @@
 # timestamp-photos
 
 *Install before running:*
-pip install Pillow
-pip install pillow-heif
+- pip install Pillow
+- pip install pillow-heif
 
 *Customize:*
 
