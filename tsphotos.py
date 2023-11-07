@@ -46,7 +46,6 @@ def add_rounded_rectangle(draw, position, radius, fill):
 
 
 def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
-    
     output_directory = os.path.join(directory, "timestamped")
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -64,6 +63,7 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
                     img = ImageOps.exif_transpose(img)
                     
                     # created_time = os.path.getctime(file_path)
+                    # this works on Mac only for now
                     created_time = os.stat(file_path).st_birthtime
                     created_datetime = datetime.fromtimestamp(created_time)
                     current_datetime = created_datetime.strftime("%a %b %d, %Y %-I:%M %p")
@@ -102,7 +102,6 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
 
                     text_position = (text_x, text_y)
                     
-                    # Calculate background position based on text position and dimensions
                     padding = 26
                     background_position = (
                         text_position[0] - padding,
@@ -123,11 +122,9 @@ def add_timestamp(directory, suffix="_ts", font_path="IBMPlexSans-Regular.ttf"):
                     text_color = (235, 235, 235)
                     draw.text(text_position, current_datetime, font=font, fill=text_color)
                     
-                    # Define the output file name and path
                     output_filename = f"{filename.rsplit('.', 1)[0]}{suffix}.jpg"
                     output_file_path = os.path.join(output_directory, output_filename)
                     
-                    # Save the image with the timestamp
                     img.save(output_file_path, 'jpeg', quality=95)
                     print(f"Timestamp added to {output_filename}")
             except Exception as e:
